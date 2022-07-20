@@ -109,11 +109,19 @@ var app = http.createServer(function (request, response) {
       var post = qs.parse(body);
       var title = post.title;
       var description = post.description;
+      fs.writeFile(`data/${title}`, description, "utf8", (err) => {
+        // data안에 title 의 이름에 파일이 생짐
+        // 안에 내용은 description
+        response.writeHead(
+          302,
+          // 200은 성공
+          //302는 page를 redirection
+          { Location: `/?id=${title}` }
+        );
+        response.end();
+      });
       // parde를 통해 정보를 객체화
-      console.log(post);
     });
-    response.writeHead(200);
-    response.end("success");
   } else {
     response.writeHead(404);
     response.end("Not found");
