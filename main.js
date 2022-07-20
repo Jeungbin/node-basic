@@ -1,6 +1,7 @@
 var http = require("http");
 var fs = require("fs");
 var url = require("url");
+const qs = require("querystring");
 
 const templateHTML = (title, list, body) => {
   return `
@@ -80,7 +81,7 @@ var app = http.createServer(function (request, response) {
         title,
         list,
         `
-        <form action="http://localhost:3000/process_create" method="post">
+        <form action="http://localhost:3000/create_process" method="post">
             <p><input type="text" name="title" placeholder="title"></p>
             <p>
               <textarea name="description" placeholder="description"></textarea>
@@ -94,6 +95,25 @@ var app = http.createServer(function (request, response) {
       response.writeHead(200);
       response.end(template);
     });
+  } else if (pathname === "/create_process") {
+    var body = "";
+    request.on("data", (data) => {
+      body = body + data;
+    });
+    // web browser 가 post 방식으로 data를 전송할때
+    // data가 많으면 이 방법을 쓴다.
+    // data = 조각 조각의 data를 수신할때 마자 callback을 호출
+    //data라는 인자를 통해 수신한 정보를 전달
+    request.on("end", () => {
+      // data가 더이상 없으면 callback수신
+      var post = qs.parse(body);
+      var title = post.title;
+      var description = post.description;
+      // parde를 통해 정보를 객체화
+      console.log(post);
+    });
+    response.writeHead(200);
+    response.end("success");
   } else {
     response.writeHead(404);
     response.end("Not found");
