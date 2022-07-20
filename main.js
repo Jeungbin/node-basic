@@ -72,6 +72,8 @@ var app = http.createServer(function (request, response) {
                 <input type="hidden" name="id" value="${title}">
                 <input type="submit" value="delete">
               </form>`
+              // delete 는 항상 form
+              //항상 post방식으로
             );
             response.writeHead(200);
             response.end(template);
@@ -174,10 +176,27 @@ var app = http.createServer(function (request, response) {
       // node filr rename
       //fs.rename(oldPath, newPath, callback)
       fs.rename(`data/${id}`, `data/${title}`, function (error) {
+        // 수정이 끝나면
         fs.writeFile(`data/${title}`, description, "utf8", function (err) {
           response.writeHead(302, { Location: `/?id=${title}` });
+          // 해당page로 이동
           response.end();
         });
+      });
+    });
+  } else if (pathname === "/delete_process") {
+    var body = "";
+    request.on("data", function (data) {
+      body = body + data;
+    });
+    request.on("end", function () {
+      var post = qs.parse(body);
+      var id = post.id;
+      fs.unlink(`data/${id}`, (error) => {
+        //삭제가 끝나면
+        response.writeHead(302, { Location: `/` });
+        //home 으로 보낸다
+        response.end();
       });
     });
   } else {
