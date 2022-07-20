@@ -2,7 +2,6 @@ var http = require("http");
 var fs = require("fs");
 var url = require("url");
 const qs = require("querystring");
-
 const templateHTML = (title, list, body, control) => {
   return `
 <!doctype html>
@@ -14,7 +13,6 @@ const templateHTML = (title, list, body, control) => {
 <body>
   <h1><a href="/">WEB</a></h1>
   ${list}
-  
   ${control}
   ${body}
 </body>
@@ -34,9 +32,10 @@ const templateList = (fillist) => {
 var app = http.createServer(function (request, response) {
   var _url = request.url;
   var queryData = url.parse(_url, true).query;
-  //console.log(url.parse(_url, true));
+  //console.log(queryData);
+  //{ id: 'CSSss' }
   var pathname = url.parse(_url, true).pathname;
-  console.log(pathname);
+  //console.log(pathname);
   // all pages pathname is '/'
   if (pathname === "/") {
     if (queryData.id === undefined) {
@@ -78,7 +77,7 @@ var app = http.createServer(function (request, response) {
   } else if (pathname === "/create") {
     fs.readdir("./data", (error, fillist) => {
       //console.log(fillist); // [ 'CSS', 'HTML', 'JavaScript' ]
-      var title = "WEB -create";
+      var title = "WEB - create";
       var list = templateList(fillist);
       var template = templateHTML(
         title,
@@ -103,6 +102,8 @@ var app = http.createServer(function (request, response) {
     var body = "";
     request.on("data", (data) => {
       body = body + data;
+      //console.log(body)
+      // title=s&description=ds
     });
     // web browser 가 post 방식으로 data를 전송할때
     // data가 많으면 이 방법을 쓴다.
@@ -152,6 +153,26 @@ var app = http.createServer(function (request, response) {
         );
         response.writeHead(200);
         response.end(template);
+      });
+    });
+  } else if (pathname === "/update_process") {
+    var body = "";
+    request.on("data", function (data) {
+      body = body + data;
+    });
+    request.on("end", function () {
+      var post = qs.parse(body);
+      var id = post.id;
+      var title = post.title;
+      var description = post.description;
+
+      // node filr rename
+      //fs.rename(oldPath, newPath, callback)
+      fs.rename(`data/${id}`, `data/${title}`, function (error) {
+        fs.writeFile(`data/${title}`, description, "utf8", function (err) {
+          response.writeHead(302, { Location: `/?id=${title}` });
+          response.end();
+        });
       });
     });
   } else {
