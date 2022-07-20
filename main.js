@@ -3,7 +3,7 @@ var fs = require("fs");
 var url = require("url");
 const qs = require("querystring");
 
-const templateHTML = (title, list, body) => {
+const templateHTML = (title, list, body, control) => {
   return `
 <!doctype html>
 <html>
@@ -14,7 +14,8 @@ const templateHTML = (title, list, body) => {
 <body>
   <h1><a href="/">WEB</a></h1>
   ${list}
-  <a href="/create">create</a>
+  
+  ${control}
   ${body}
 </body>
 </html>
@@ -48,7 +49,8 @@ var app = http.createServer(function (request, response) {
         var template = templateHTML(
           title,
           list,
-          `<h2>${title}</h2>${description}`
+          `<h2>${title}</h2>${description}`,
+          `<a href="/create">create</a>`
         );
         response.writeHead(200);
         response.end(template);
@@ -64,7 +66,8 @@ var app = http.createServer(function (request, response) {
             var template = templateHTML(
               title,
               list,
-              `<h2>${title}</h2>${description}`
+              `<h2>${title}</h2>${description}`,
+              `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`
             );
             response.writeHead(200);
             response.end(template);
@@ -90,7 +93,8 @@ var app = http.createServer(function (request, response) {
               <input type="submit">
             </p>
           </form>
-        `
+        `,
+        ""
       );
       response.writeHead(200);
       response.end(template);
@@ -111,12 +115,14 @@ var app = http.createServer(function (request, response) {
       var description = post.description;
       fs.writeFile(`data/${title}`, description, "utf8", (err) => {
         // data안에 title 의 이름에 파일이 생짐
+        // filr이 생긴다는 것은 파일이름에 새로운 webpage생설
         // 안에 내용은 description
         response.writeHead(
           302,
           // 200은 성공
           //302는 page를 redirection
           { Location: `/?id=${title}` }
+          // 해당파일(방금생성한 파일)로 이동
         );
         response.end();
       });
