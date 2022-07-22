@@ -1,12 +1,16 @@
 var http = require("http");
+//서버와 웹 브라우저 간의 연결 고리
 var fs = require("fs");
+//File System module
+//파일 처리와 관련된 전반적인 작업하는 모듈
+//const fs = require( "fs" ); // => fs 모듈 불러오기
 var url = require("url");
 var qs = require("querystring");
 var template = require("./lib/template.js");
 var path = require("path");
 var sanitizeHtml = require("sanitize-html");
-
 var app = http.createServer(function (request, response) {
+  //createServer // 웹서버 만든다.
   var _url = request.url;
   var queryData = url.parse(_url, true).query;
   var pathname = url.parse(_url, true).pathname;
@@ -78,6 +82,7 @@ var app = http.createServer(function (request, response) {
     });
   } else if (pathname === "/create_process") {
     var body = "";
+
     request.on("data", function (data) {
       body = body + data;
     });
@@ -120,10 +125,14 @@ var app = http.createServer(function (request, response) {
   } else if (pathname === "/update_process") {
     var body = "";
     request.on("data", function (data) {
+      //request data
       body = body + data;
+      console.log(body);
+      // body id=cffssd&title=cffssd&description=cssd
     });
     request.on("end", function () {
       var post = qs.parse(body);
+
       var id = post.id;
       var title = post.title;
       var description = post.description;
@@ -141,6 +150,8 @@ var app = http.createServer(function (request, response) {
     });
     request.on("end", function () {
       var post = qs.parse(body);
+      //console.log(post);
+      //{ id: 'sdsd' }
       var id = post.id;
       const filteredId = path.parse(id).base;
       fs.unlink(`data/${filteredId}`, function (error) {
@@ -153,4 +164,4 @@ var app = http.createServer(function (request, response) {
     response.end("Not found");
   }
 });
-app.listen(3750);
+app.listen(3009);

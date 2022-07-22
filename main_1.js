@@ -35,7 +35,10 @@ var template = {
 
 var app = http.createServer(function (request, response) {
   var _url = request.url;
+  // _url = /?id=HTML  query string을 의미
   var queryData = url.parse(_url, true).query;
+  //query => id=HTML&page=12 이런형식
+  //parse 는 이런형식을 객체로 바꿈
   //console.log(queryData);
   //{ id: 'CSSss' }
   var pathname = url.parse(_url, true).pathname;
@@ -49,19 +52,21 @@ var app = http.createServer(function (request, response) {
         var title = "welcome";
         var description = "hello node.js";
         var list = template.list(fillist);
-        var html = template.html(
+        var template = template.html(
           title,
           list,
           `<h2>${title}</h2>${description}`,
           `<a href="/create">create</a>`
         );
         response.writeHead(200);
-        response.end(html);
+        // server response
+        response.end(template);
       });
     } else {
       fs.readdir("./data", (error, fillist) => {
         fs.readFile(
-          `data/${queryData.id}`,
+          // read entire entire contents of a file
+          `data/${queryData.id}`, // path
           "utf8",
           function (err, description) {
             var title = queryData.id;
@@ -87,6 +92,7 @@ var app = http.createServer(function (request, response) {
     }
   } else if (pathname === "/create") {
     fs.readdir("./data", (error, fillist) => {
+      //reacd a directory
       //console.log(fillist); // [ 'CSS', 'HTML', 'JavaScript' ]
       var title = "WEB - create";
       var list = template.list(fillist);
@@ -112,8 +118,9 @@ var app = http.createServer(function (request, response) {
   } else if (pathname === "/create_process") {
     var body = "";
     request.on("data", (data) => {
+      //요청에 data있으면
       body = body + data;
-      //console.log(body)
+      console.log(body);
       // title=s&description=ds
     });
     // web browser 가 post 방식으로 data를 전송할때
@@ -123,6 +130,7 @@ var app = http.createServer(function (request, response) {
     request.on("end", () => {
       // data가 더이상 없으면 callback수신
       var post = qs.parse(body);
+      // key value형태로
       var title = post.title;
       var description = post.description;
       fs.writeFile(`data/${title}`, description, "utf8", (err) => {
@@ -170,9 +178,13 @@ var app = http.createServer(function (request, response) {
     var body = "";
     request.on("data", function (data) {
       body = body + data;
+      console.log(data);
     });
     request.on("end", function () {
       var post = qs.parse(body);
+      //qs => formatingURL query string
+      //parse into key:value
+      //id=html...
       var id = post.id;
       var title = post.title;
       var description = post.description;
